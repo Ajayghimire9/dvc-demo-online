@@ -1,13 +1,36 @@
+"""Backward-compatible wrapper for the CustomerFlow ingestion command."""
+
 import pandas as pd
-import numpy as np
-import os
 
-df = pd.read_csv('https://raw.githubusercontent.com/araj2/customer-database/master/Ecommerce%20Customers.csv')
+from customerflow.data import (
+    FEATURES,
+    TARGET,
+    load_source,
+    prepare_frame,
+    write_ingestion_manifest,
+)
+from customerflow.ingest import main, run
 
-df = df.iloc[:, 3:]
+MODEL_COLUMNS = FEATURES + [TARGET]
 
-df = df[df['Length of Membership'] > 1]
 
-df.drop(columns=['Avg. Session Length'], inplace=True)
+def transform(frame: pd.DataFrame, minimum_membership: float = 0.0) -> pd.DataFrame:
+    """Keep the historical import path while using the canonical validator."""
 
-df.to_csv(os.path.join('data','customer.csv'))
+    return prepare_frame(frame, require_target=True, minimum_membership=minimum_membership)
+
+
+__all__ = [
+    "FEATURES",
+    "MODEL_COLUMNS",
+    "TARGET",
+    "load_source",
+    "main",
+    "run",
+    "transform",
+    "write_ingestion_manifest",
+]
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,21 @@
+stages:
+  curate:
+    cmd: python -m customerflow.ingest --input examples/customers.csv --output data/curated/customers.csv
+    deps:
+      - src/customerflow/data.py
+      - src/customerflow/ingest.py
+      - examples/customers.csv
+    outs:
+      - data/curated/customers.csv
+      - data/curated/customers.manifest.json
+  train:
+    cmd: python -m customerflow.train --data data/curated/customers.csv --output artifacts
+    deps:
+      - src/customerflow/model.py
+      - src/customerflow/registry.py
+      - data/curated/customers.csv
+    outs:
+      - artifacts/model.joblib
+      - artifacts/model.manifest.json
+    metrics:
+      - artifacts/metrics.json
